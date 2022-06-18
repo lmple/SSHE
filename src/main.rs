@@ -14,7 +14,6 @@ fn printlines(start : usize, end : usize, v : &Vec<Vec<u8>>){
 
         for byte in line {
             write!(str_bytes, "{:02x} ", byte).ok();
-            //write!(str_line, "{} ", );
         }
 
         let conv_str = String::from_utf8_lossy(line);
@@ -32,8 +31,9 @@ fn show_commands() -> String {
     help.push_str("d : go to next line\n");
     help.push_str("h : print help\n");
     help.push_str("g : go to line n\n");
-    help.push_str("s : status\n"); //todo
+    help.push_str("i : informations\n"); //todo
     help.push_str("m : modify\n"); //todo
+    help.push_str("s : search\n"); //todo
     help.push_str("e : exit the program");
 
     return help;
@@ -65,14 +65,13 @@ fn goto(start_line : &mut usize, max_len : usize) -> String {
 
     flush();
 
-    // recreated everytime to avoid stdin problems
     let mut line_to_go : String = String::new();
 
-    //get user input
+    //the line number
     stdin.read_line(&mut line_to_go).ok();
-
     let clean_number = line_to_go.trim();
 
+    //empty result if ok, otherwise print error
     let mut result = String::new();
 
     match clean_number.parse::<usize>() {
@@ -164,8 +163,11 @@ fn main() {
             "d" => down(&mut start_line, max_len),
             "h" => result = show_commands(),
             "g" => result = goto(&mut start_line, max_len),
-            "exit" => break,
-            _ => println!("Unknown command")
+            "i" => result.push_str("Not implemented yet"),
+            "m" => result.push_str("Not implemented yet"),
+            "s" => result.push_str("Not implemented yet"),
+            "e" => break,
+            _ => result.push_str("Unknown command")
         }
         println!("");
     }
