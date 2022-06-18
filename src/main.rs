@@ -10,26 +10,29 @@ fn printlines(start : usize, end : usize, v : &Vec<Vec<u8>>){
     for l in start..end+1 {
         let line = &v[l];
 
-        let mut str_line = String::new();
+        let mut str_bytes = String::new();
 
         for byte in line {
-            write!(str_line, "{:02x} ", byte).ok();
+            write!(str_bytes, "{:02x} ", byte).ok();
+            //write!(str_line, "{} ", );
         }
 
-        println!("{}: {}   {}", l, str_line, "");
+        let conv_str = String::from_utf8_lossy(line);
+
+        println!("{:02}: {}   {}", l, str_bytes, conv_str);
     }
 
     //print an empty lines after
     println!("");
 }
 
-fn show_commands(){
-    println!("u -> go to previous line");
-    println!("d -> go to next line");
-    println!("exit -> exit the program");
+fn show_commands() -> String {
+    let mut help = String::new();
+    help.push_str("u -> go to previous line\n");
+    help.push_str("d -> go to next line\n");
+    help.push_str("exit -> exit the program\n");
 
-    //print an empty lines after
-    println!("");
+    return help;
 }
 
 fn up(start_line : &mut usize){
@@ -86,13 +89,24 @@ fn main() {
 
     let mut start_line = 0;
 
-    let mut number_lines_printed = 10;
+    let number_lines_printed = 10;
 
     let stdin = std::io::stdin();
 
+    //to print results
+    let mut result = String::new();
+
     loop {
+        print!("\x1B[2J\x1B[1;1H");
+
         //print first N lines
         printlines(start_line, start_line+number_lines_printed-1, &bytes_lines);
+
+        if result != "" {
+            println!("{}", result);
+        }
+
+        result = String::new();
 
         print!(">> ");
 
@@ -116,7 +130,7 @@ fn main() {
         match cleaned_command {
             "u" => up(&mut start_line),
             "d" => down(&mut start_line, max_len),
-            "h" => show_commands(),
+            "h" => result = show_commands(),
             "exit" => break,
             _ => println!("Unknown command")
         }
