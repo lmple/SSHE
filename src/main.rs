@@ -1,9 +1,10 @@
 use std::fs::File;
 use std::io::BufReader;
 use std::io::Read;
-use core::fmt::Write;
 use std::env;
 use std::path::Path;
+use std::io::Write;
+use std::fmt::Write as format;
 
 fn printlines(start : usize, end : usize, v : &Vec<Vec<u8>>){
     for l in start..end+1 {
@@ -15,7 +16,7 @@ fn printlines(start : usize, end : usize, v : &Vec<Vec<u8>>){
             write!(str_line, "{:02x} ", byte).ok();
         }
 
-        println!("{}: {}", l, str_line);
+        println!("{}: {}   {}", l, str_line, "");
     }
 
     //print an empty lines after
@@ -29,6 +30,18 @@ fn show_commands(){
 
     //print an empty lines after
     println!("");
+}
+
+fn up(start_line : &mut usize){
+    if *start_line > 0 {
+        *start_line -= 1;
+    }
+}
+
+fn down(start_line : &mut usize, max_len : usize){
+    if *start_line < max_len-1 {
+        *start_line += 1;
+    }
 }
 
 fn main() {
@@ -71,19 +84,24 @@ fn main() {
         }
     }
 
+    let mut start_line = 0;
 
-    let start_line = 0;
-
+    let mut number_lines_printed = 10;
 
     let stdin = std::io::stdin();
 
     loop {
-        //print first ten lines
-        printlines(start_line, 9, &bytes_lines);
+        //print first N lines
+        printlines(start_line, start_line+number_lines_printed-1, &bytes_lines);
 
         print!(">> ");
 
         //flush to avoid problem with priting
+        //
+        match std::io::stdout().flush() {
+            Ok(_) => (),
+            Err(error) => println!("{}", error),
+        }
 
         // recreated everytime to avoid stdin problems
         let mut user_command : String = String::new();
@@ -91,16 +109,19 @@ fn main() {
         //get user input
         stdin.read_line(&mut user_command).ok();
 
+        let max_len = bytes_lines.len();
+
         //get clean command and match with good command
         let cleaned_command = user_command.trim();
         match cleaned_command {
-            "u" => println!("up"),
-            "d" => println!("down"),
+            "u" => up(&mut start_line),
+            "d" => down(&mut start_line, max_len),
             "h" => show_commands(),
             "exit" => break,
             _ => println!("Unknown command")
         }
-
-        println!("Bye");
+        println!("");
     }
+
+    println!("Bye");
 }
