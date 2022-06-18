@@ -28,9 +28,13 @@ fn printlines(start : usize, end : usize, v : &Vec<Vec<u8>>){
 
 fn show_commands() -> String {
     let mut help = String::new();
-    help.push_str("u -> go to previous line\n");
-    help.push_str("d -> go to next line\n");
-    help.push_str("exit -> exit the program\n");
+    help.push_str("u : go to previous line\n");
+    help.push_str("d : go to next line\n");
+    help.push_str("h : print help\n");
+    help.push_str("g : go to line n\n");
+    help.push_str("s : status\n"); //todo
+    help.push_str("m : modify\n"); //todo
+    help.push_str("e : exit the program");
 
     return help;
 }
@@ -45,6 +49,38 @@ fn down(start_line : &mut usize, max_len : usize){
     if *start_line < max_len-1 {
         *start_line += 1;
     }
+}
+
+fn flush(){
+    //flush to avoid problem with priting
+    match std::io::stdout().flush() {
+        Ok(_) => (),
+        Err(error) => println!("{}", error),
+    }
+}
+
+fn goto(start_line : &mut usize, max_len : usize) -> String {
+    let stdin = std::io::stdin();
+    print!("line : ");
+
+    flush();
+
+    // recreated everytime to avoid stdin problems
+    let mut line_to_go : String = String::new();
+
+    //get user input
+    stdin.read_line(&mut line_to_go).ok();
+
+    let clean_number = line_to_go.trim();
+
+    let mut result = String::new();
+
+    match clean_number.parse::<usize>() {
+        Ok(i) => if i < max_len {*start_line = i} else { result.push_str("Please enter a valid number") },
+        Err(..) => result.push_str("Not a number!")
+    };
+
+    return result;
 }
 
 fn main() {
@@ -103,7 +139,7 @@ fn main() {
         printlines(start_line, start_line+number_lines_printed-1, &bytes_lines);
 
         if result != "" {
-            println!("{}", result);
+            println!("{}\n", result);
         }
 
         result = String::new();
@@ -111,11 +147,7 @@ fn main() {
         print!(">> ");
 
         //flush to avoid problem with priting
-        //
-        match std::io::stdout().flush() {
-            Ok(_) => (),
-            Err(error) => println!("{}", error),
-        }
+        flush();
 
         // recreated everytime to avoid stdin problems
         let mut user_command : String = String::new();
@@ -131,6 +163,7 @@ fn main() {
             "u" => up(&mut start_line),
             "d" => down(&mut start_line, max_len),
             "h" => result = show_commands(),
+            "g" => result = goto(&mut start_line, max_len),
             "exit" => break,
             _ => println!("Unknown command")
         }
