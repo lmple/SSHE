@@ -2,7 +2,8 @@ use std::fs::File;
 use std::io::BufReader;
 use std::io::Read;
 use core::fmt::Write;
-
+use std::env;
+use std::path::Path;
 
 fn printlines(start : usize, end : usize, v : Vec<Vec<u8>>){
     for l in start..end+1 {
@@ -14,12 +15,27 @@ fn printlines(start : usize, end : usize, v : Vec<Vec<u8>>){
             write!(str_line, "{:02x} ", byte);
         }
 
+
         println!("{}: {}", l, str_line);
     }
 }
 
 fn main() {
-    let buffer = BufReader::new(File::open("/Users/loiclievre/sources/perso/hexa/blue.gb").unwrap());
+    let args: Vec<String> = env::args().collect();
+
+    if args.len() != 2 {
+        println!("Please enter one filename");
+        return;
+    }
+
+    let file_path = &args[1];
+
+    if !Path::new(file_path).is_file() {
+        println!("Please use a valid binary file");
+        return;
+    }
+
+    let buffer = BufReader::new(File::open(file_path).unwrap());
 
     let mut count_per_line : usize = 0;
     let max_per_line : usize = 12;
@@ -27,7 +43,6 @@ fn main() {
     let mut bytes_lines : Vec<Vec<u8>> = Vec::new();
 
     let bytes = buffer.bytes();
-
 
     let mut bytes_line : Vec<u8> = Vec::new();
 
