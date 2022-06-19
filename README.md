@@ -13,3 +13,8 @@ Work in progress...
 
 
 ## TODO
+
+- Implement modify function
+- Implement search function
+- Implement write function
+- Make a WASM version
