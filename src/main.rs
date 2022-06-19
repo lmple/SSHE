@@ -6,7 +6,7 @@ use std::path::Path;
 use std::io::Write;
 use std::fmt::Write as format;
 
-fn printlines(start : usize, end : usize, v : &Vec<Vec<u8>>){
+fn print_lines(start : usize, end : usize, v : &Vec<Vec<u8>>, number_bytes_per_line : usize){
     for l in start..end+1 {
         let line = &v[l];
 
@@ -18,7 +18,9 @@ fn printlines(start : usize, end : usize, v : &Vec<Vec<u8>>){
 
         let conv_str = String::from_utf8_lossy(line);
 
-        println!("{:02}: {}   {}", l, str_bytes, conv_str);
+        let b = l*number_bytes_per_line;
+
+        println!("{:02}|{:02}: {}   {}", l, b, str_bytes, conv_str);
     }
 
     //print an empty lines after
@@ -27,14 +29,16 @@ fn printlines(start : usize, end : usize, v : &Vec<Vec<u8>>){
 
 fn show_commands() -> String {
     let mut help = String::new();
-    help.push_str("u : go to previous line\n");
-    help.push_str("d : go to next line\n");
-    help.push_str("h : print help\n");
-    help.push_str("g : go to line n\n");
-    help.push_str("i : informations\n"); //todo
-    help.push_str("m : modify\n"); //todo
-    help.push_str("s : search\n"); //todo
-    help.push_str("e : exit the program");
+    help.push_str("u  : go to previous line\n");
+    help.push_str("d  : go to next line\n");
+    help.push_str("h  : print help\n");
+    help.push_str("gl : go to line n\n");
+    help.push_str("gb : go to byte n\n");
+    help.push_str("i  : information\n");
+    help.push_str("m  : modify\n"); //todo
+    help.push_str("s  : search\n"); //todo
+    help.push_str("w  : write\n"); //todo
+    help.push_str("e  : exit the program");
 
     return help;
 }
@@ -51,6 +55,17 @@ fn down(start_line : &mut usize, max_len : usize){
     }
 }
 
+fn info(file_path : &str, max_len : usize ) -> String {
+    let mut result = String::new();
+    result.push_str("File            : ");
+    result.push_str(&file_path);
+    result.push_str("\n");
+    result.push_str("Number of bytes : ");
+    result.push_str(&max_len.to_string());
+
+    return result;
+}
+
 fn flush(){
     //flush to avoid problem with priting
     match std::io::stdout().flush() {
@@ -59,7 +74,7 @@ fn flush(){
     }
 }
 
-fn goto(start_line : &mut usize, max_len : usize) -> String {
+fn goto_line(start_line : &mut usize, max_len : usize) -> String {
     let stdin = std::io::stdin();
     print!("line : ");
 
@@ -76,6 +91,29 @@ fn goto(start_line : &mut usize, max_len : usize) -> String {
 
     match clean_number.parse::<usize>() {
         Ok(i) => if i < max_len {*start_line = i} else { result.push_str("Please enter a valid number") },
+        Err(..) => result.push_str("Not a number!")
+    };
+
+    return result;
+}
+
+fn goto_byte(start_line : &mut usize, max_len : usize, number_bytes_per_line : usize) -> String {
+    let stdin = std::io::stdin();
+    print!("byte : ");
+
+    flush();
+
+    let mut byte_to_go : String = String::new();
+
+    //the line number
+    stdin.read_line(&mut byte_to_go).ok();
+    let clean_number = byte_to_go.trim();
+
+    //empty result if ok, otherwise print error
+    let mut result = String::new();
+
+    match clean_number.parse::<usize>() {
+        Ok(i) => if i < max_len {*start_line = i/number_bytes_per_line} else { result.push_str("Please enter a valid number") },
         Err(..) => result.push_str("Not a number!")
     };
 
@@ -100,7 +138,7 @@ fn main() {
     let buffer = BufReader::new(File::open(file_path).unwrap());
 
     let mut count_per_line : usize = 0;
-    let max_per_line : usize = 12;
+    let max_per_line : usize = 8;
 
     //all lines
     let mut bytes_lines : Vec<Vec<u8>> = Vec::new();
@@ -135,7 +173,7 @@ fn main() {
         print!("\x1B[2J\x1B[1;1H");
 
         //print first N lines
-        printlines(start_line, start_line+number_lines_printed-1, &bytes_lines);
+        print_lines(start_line, start_line+number_lines_printed-1, &bytes_lines, max_per_line);
 
         if result != "" {
             println!("{}\n", result);
@@ -154,16 +192,18 @@ fn main() {
         //get user input
         stdin.read_line(&mut user_command).ok();
 
-        let max_len = bytes_lines.len();
+        let lines_number = bytes_lines.len();
+        let bytes_number = bytes_lines.len()*max_per_line;
 
         //get clean command and match with good command
         let cleaned_command = user_command.trim();
         match cleaned_command {
             "u" => up(&mut start_line),
-            "d" => down(&mut start_line, max_len),
+            "d" => down(&mut start_line, lines_number),
             "h" => result = show_commands(),
-            "g" => result = goto(&mut start_line, max_len),
-            "i" => result.push_str("Not implemented yet"),
+            "gl" => result = goto_line(&mut start_line, lines_number),
+            "gb" => result = goto_byte(&mut start_line, bytes_number, max_per_line),
+            "i" => result = info(file_path, bytes_number),
             "m" => result.push_str("Not implemented yet"),
             "s" => result.push_str("Not implemented yet"),
             "e" => break,
