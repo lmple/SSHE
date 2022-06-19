@@ -6,6 +6,7 @@ use std::path::Path;
 use std::io::Write;
 use std::fmt::Write as format;
 
+// print the bytes of a binary file
 fn print_lines(start : usize, end : usize, v : &Vec<Vec<u8>>, number_bytes_per_line : usize){
     for l in start..end+1 {
         let line = &v[l];
@@ -27,6 +28,7 @@ fn print_lines(start : usize, end : usize, v : &Vec<Vec<u8>>, number_bytes_per_l
     println!("");
 }
 
+// print the available commands
 fn show_commands() -> String {
     let mut help = String::new();
     help.push_str("u  : go to previous line\n");
@@ -42,6 +44,7 @@ fn show_commands() -> String {
 
     return help;
 }
+
 
 fn up(start_line : &mut usize){
     if *start_line > 0 {
