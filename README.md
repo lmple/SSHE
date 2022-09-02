@@ -1,4 +1,4 @@
-# hexacli
+# SSHE
 
 ## Introduction
 
@@ -11,10 +11,10 @@ Work in progress...
 ![](img/help.png)
 
 
-
 ## TODO
 
 - Implement modify function
 - Implement search function
 - Implement write function
+- Implement a small DSL and script loading
 - Make a WASM version

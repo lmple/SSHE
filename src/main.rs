@@ -31,16 +31,16 @@ fn print_lines(start : usize, end : usize, v : &Vec<Vec<u8>>, number_bytes_per_l
 // print the available commands
 fn show_commands() -> String {
     let mut help = String::new();
-    help.push_str("u  : go to previous line\n");
-    help.push_str("d  : go to next line\n");
-    help.push_str("h  : print help\n");
-    help.push_str("gl : go to line n\n");
-    help.push_str("gb : go to byte n\n");
-    help.push_str("i  : information\n");
-    help.push_str("m  : modify\n"); //todo
-    help.push_str("s  : search\n"); //todo
-    help.push_str("w  : write\n"); //todo
-    help.push_str("e  : exit the program");
+    help.push_str("up      : go to previous line\n");
+    help.push_str("down    : go to next line\n");
+    help.push_str("help    : print help\n");
+    help.push_str("line    : go to line n\n");
+    help.push_str("go      : go to byte n\n");
+    help.push_str("info    : information\n");
+    help.push_str("modify  : modify\n"); //todo
+    help.push_str("search  : search\n"); //todo
+    help.push_str("write   : write\n"); //todo
+    help.push_str("exit    : exit the program");
 
     return help;
 }
@@ -200,18 +200,21 @@ fn main() {
 
         //get clean command and match with good command
         let cleaned_command = user_command.trim();
+        
         match cleaned_command {
-            "u" => up(&mut start_line),
-            "d" => down(&mut start_line, lines_number),
-            "h" => result = show_commands(),
-            "gl" => result = goto_line(&mut start_line, lines_number),
-            "gb" => result = goto_byte(&mut start_line, bytes_number, max_per_line),
-            "i" => result = info(file_path, bytes_number),
-            "m" => result.push_str("Not implemented yet"),
-            "s" => result.push_str("Not implemented yet"),
-            "e" => break,
+            "up" => up(&mut start_line),
+            "down" => down(&mut start_line, lines_number),
+            "help" => result = show_commands(),
+            "line" => result = goto_line(&mut start_line, lines_number),
+            "go" => result = goto_byte(&mut start_line, bytes_number, max_per_line),
+            "info" => result = info(file_path, bytes_number),
+            "modify" => result.push_str("Not implemented yet"),
+            "search" => result.push_str("Not implemented yet"),
+            "write" => result.push_str("Not implemented yet"),
+            "exit" => break,
             _ => result.push_str("Unknown command")
         }
+
         println!("");
     }
 
