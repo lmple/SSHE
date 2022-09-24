@@ -37,9 +37,9 @@ fn show_commands() -> String {
     help.push_str("line    : go to line n\n");
     help.push_str("go      : go to byte n\n");
     help.push_str("info    : information\n");
-    help.push_str("modify  : modify\n"); //todo
-    help.push_str("search  : search\n"); //todo
-    help.push_str("write   : write\n"); //todo
+    help.push_str("modify  : modify current byte\n"); //todo
+    help.push_str("search  : search text\n"); //todo
+    help.push_str("write   : write to a new file\n"); //todo
     help.push_str("exit    : exit the program");
 
     return help;
@@ -162,7 +162,7 @@ fn main() {
             bytes_line.clear();
         }
     }
-
+    
     let mut start_line = 0;
 
     let number_lines_printed = 10;
